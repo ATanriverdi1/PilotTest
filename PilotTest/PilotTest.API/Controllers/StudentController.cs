@@ -26,5 +26,36 @@ namespace PilotTest.API.Controllers
         {
             return await _context.Students.ToListAsync();
         }
+
+        [HttpGet("{id}")]
+        public async Task<Student> GetStudentDetail(int id)
+        {
+            var student = await _context.Students.FirstOrDefaultAsync(x => x.Id == id);
+            return student;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] Student student)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            await _context.Students.AddAsync(student);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+        
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            Student student = await _context.Students.FindAsync(id);
+            if (student != null) 
+            {
+                _context.Students.Remove(student);
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+            return NotFound();
+        }
+
     }
 }

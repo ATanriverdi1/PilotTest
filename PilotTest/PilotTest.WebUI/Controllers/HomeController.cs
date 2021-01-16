@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -32,6 +30,48 @@ namespace PilotTest.WebUI.Controllers
                 students = JsonConvert.DeserializeObject<List<StudentData>>(result);
             }
             return View(students);
+        }
+
+        public async Task<IActionResult> Detail(int id)
+        {
+            StudentData studentData = new StudentData();
+            HttpClient client = api.Initial();
+            HttpResponseMessage responseMessage = await client.GetAsync($"api/student/{id}");
+            if (responseMessage.IsSuccessStatusCode)
+            {
+                var result = responseMessage.Content.ReadAsStringAsync().Result;
+                studentData = JsonConvert.DeserializeObject<StudentData>(result);
+            }
+            return View(studentData);
+        }
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(StudentData studentData)
+        {
+            HttpClient client = api.Initial();
+
+            var postTask = await client.PostAsJsonAsync<StudentData>("api/student", studentData);
+            if (postTask.IsSuccessStatusCode)
+            {
+                return RedirectToAction("Index");
+            }
+            
+            return View(studentData);
+        }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            StudentData student = new StudentData();
+            HttpClient client = api.Initial();
+            HttpResponseMessage responseMessage = await client.DeleteAsync($"api/student/{id}");
+
+            return RedirectToAction("Index");
         }
 
         public IActionResult Privacy()
